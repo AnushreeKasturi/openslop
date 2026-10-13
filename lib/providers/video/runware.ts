@@ -15,13 +15,17 @@ const FINISHED: Record<string, VideoJobStatus> = {
 	error: "failed",
 };
 
-function toVideoJob(video: {
+type RunwareVideoTask = {
 	taskUUID: string;
 	status: string;
 	videoURL?: string;
-}): VideoJob {
+	cost?: number;
+};
+
+function toVideoJob(video: RunwareVideoTask): VideoJob {
 	return {
 		url: video.videoURL,
+		costUsd: video.cost,
 		metadata: {
 			jobId: video.taskUUID,
 			status: FINISHED[video.status] ?? "processing",
@@ -103,6 +107,7 @@ export class RunwareVideo extends BaseVideoProvider {
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
+				includeCost: true,
 				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
 			});
@@ -116,11 +121,9 @@ export class RunwareVideo extends BaseVideoProvider {
 
 	protected async _poll(jobId: string): Promise<VideoJob> {
 		return withRunware(this.apiKey, async (runware) => {
-			const results = await runware.getResponse<{
-				taskUUID: string;
-				status: string;
-				videoURL?: string;
-			}>({ taskUUID: jobId });
+			const results = await runware.getResponse<RunwareVideoTask>({
+				taskUUID: jobId,
+			});
 
 			const video = results?.[0];
 			if (!video) throw new Error("Job not found");

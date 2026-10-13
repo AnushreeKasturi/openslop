@@ -38,7 +38,11 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 	}
 
 	if (outcome.kind === "completed") {
-		await updateJob(jobId, { status: "completed", result: outcome.result });
+		await updateJob(jobId, {
+			status: "completed",
+			result: outcome.result,
+			cost_usd: outcome.costUsd,
+		});
 		return;
 	}
 
