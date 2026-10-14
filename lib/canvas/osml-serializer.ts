@@ -1,13 +1,18 @@
 import { Descendant } from "slate";
+import { characterRef } from "@/lib/connectors/character-refs";
 import type { CanvasElement } from "./types";
 import { isScene } from "./scenes";
-import { isAssetElement } from "./guards";
+import { isAssetElement, isCharacterRef } from "./guards";
 import { sceneMarker, withoutCaretMarker } from "./constants";
 import { flatAttributes } from "./element-attributes";
 import { escapeXml } from "./xml-escape";
 
 export function getElementText(element: CanvasElement): string {
-	return element.children.map((child) => child.text).join("");
+	return element.children
+		.map((child) =>
+			isCharacterRef(child) ? characterRef(child.name) : child.text,
+		)
+		.join("");
 }
 
 /** What the user actually typed, with the caret marker leaf left behind. */
