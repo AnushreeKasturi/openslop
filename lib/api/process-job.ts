@@ -1,9 +1,8 @@
-import isEqual from "lodash/isEqual";
 import { stringifyError } from "@/lib/errors";
 import { isTerminal } from "@/lib/gateway/base";
 import { failIfExpired } from "./job-deadline";
 import { getJobHandler } from "./job-handlers";
-import { enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
+import { claimJob, enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
 import { logger } from "./logger";
 
 const PENDING_RETRY_SECONDS = 5;
@@ -22,11 +21,11 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 	const job = await failIfExpired(loaded);
 	if (isTerminal(job.status)) return;
 
-	const handler = getJobHandler(job.connector_type);
-
-	if (job.status !== "processing") {
-		await updateJob(jobId, { status: "processing" });
+	if (job.status === "processing" || !(await claimJob(jobId))) {
+		throw new Error(`Job ${jobId} is held by another delivery`);
 	}
+
+	const handler = getJobHandler(job.connector_type);
 
 	let outcome;
 	try {
@@ -46,9 +45,6 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 		return;
 	}
 
-	if (!isEqual(job.metadata, outcome.metadata)) {
-		await updateJob(jobId, { metadata: outcome.metadata });
-	}
-
+	await updateJob(jobId, { status: "pending", metadata: outcome.metadata });
 	await enqueueJob(jobId, { delaySeconds: PENDING_RETRY_SECONDS });
 }
