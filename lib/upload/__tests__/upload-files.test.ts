@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { partitionFiles, UPLOAD_KINDS } from "../upload-files";
+import {
+	partitionFiles,
+	UPLOAD_KINDS,
+	UPLOAD_PATHNAME,
+	uploadPathname,
+} from "../upload-files";
 
 const MAX_IMAGE_UPLOAD_BYTES = UPLOAD_KINDS.image.maxBytes;
 
@@ -96,5 +101,26 @@ describe("partitionFiles", () => {
 			accepted: [],
 			rejected: [{ name: "huge.mp3", reason: "is over 20 MB" }],
 		});
+	});
+});
+
+describe("uploadPathname", () => {
+	it("puts each file in its own folder under the upload path", () => {
+		const first = uploadPathname("photo.png");
+
+		expect(first).toMatch(UPLOAD_PATHNAME);
+		expect(first).not.toBe(uploadPathname("photo.png"));
+	});
+
+	it.each([
+		["../../etc/passwd", "passwd"],
+		["C:\\Users\\me\\cat pic.png", "cat_pic.png"],
+		["...hidden", "hidden"],
+		["", "upload"],
+	])("sanitizes %j to %j", (name, expected) => {
+		const pathname = uploadPathname(name);
+
+		expect(pathname).toMatch(UPLOAD_PATHNAME);
+		expect(pathname.endsWith(`/${expected}`)).toBe(true);
 	});
 });
