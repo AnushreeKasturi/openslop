@@ -19,7 +19,8 @@ import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
 import { ModelAttribute } from "./attributes/model-attribute";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
-import { flatAttributes } from "@/lib/canvas/element-attributes";
+import { InputAttributeField } from "./attributes/input-attribute-field";
+import { clampedNumber, flatAttributes } from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
 
@@ -27,6 +28,8 @@ function formatValue(value: string, unit?: string): string {
 	if (!value) return UNSET;
 	return unit ? `${value}${unit}` : value;
 }
+
+const SECONDS_FIELD = "w-20 font-numeric";
 
 interface AttributeBadgeProps {
 	element: ContentElement;
@@ -124,6 +127,25 @@ export function AttributeBadge({
 				placeholder={spec.edit.placeholder}
 				rows={spec.edit.rows}
 				hideLabel={hideLabel}
+			/>
+		);
+	}
+
+	if (spec.edit.kind === "seconds") {
+		const { min } = spec.edit;
+		return (
+			// Keyed on the value so a trim dragged on the timeline replaces the draft.
+			<InputAttributeField
+				key={value}
+				element={element}
+				attrKey={attrKey}
+				value={value}
+				label={spec.label}
+				parse={(text) => clampedNumber(text, { min })?.toString()}
+				inputMode="decimal"
+				placeholder="Auto"
+				aria-label={`${spec.label} in seconds`}
+				className={SECONDS_FIELD}
 			/>
 		);
 	}

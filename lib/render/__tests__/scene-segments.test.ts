@@ -111,9 +111,10 @@ const resolved = (
 	prompt: "",
 	url,
 	durationSec: 0,
+	mediaDurationSec: 0,
+	trimStartSec: 0,
 	loops: 1,
 	loop: false,
-	trimToDialogue: true,
 	volume: 10,
 	motion: "none",
 });

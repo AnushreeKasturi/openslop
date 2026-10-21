@@ -323,7 +323,6 @@ describe("executeToolCall", () => {
 		words: 0,
 		dialogueIds: [],
 		durationSec: seconds,
-		trimToDialogue: false,
 		decidedBy: "duration" as const,
 	});
 
@@ -339,7 +338,6 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 					{
@@ -349,7 +347,6 @@ describe("executeToolCall", () => {
 						seconds: 1,
 						words: 0,
 						dialogueIds: [],
-						trimToDialogue: true,
 						decidedBy: "minimum",
 					},
 					{
@@ -359,7 +356,6 @@ describe("executeToolCall", () => {
 						seconds: 1,
 						words: 2,
 						dialogueIds: ["nar2"],
-						trimToDialogue: true,
 						decidedBy: "minimum",
 					},
 				],
@@ -377,7 +373,7 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("says when an untrimmed video's own duration sets its length", async () => {
+	it("says when a video's own duration sets its length", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_element_lengths", input: {} },
 			context({
@@ -400,10 +396,10 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v1: 8.0s, its full duration, untrimmed; 6 words of dialogue (nar1) after it.",
+			"Scene 1 video v1: 8.0s, its own length; 6 words of dialogue (nar1) after it.",
 		);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v2: 5.0s, its full duration, untrimmed; no dialogue after it.",
+			"Scene 1 video v2: 5.0s, its own length; no dialogue after it.",
 		);
 		expect(outcome.ok && outcome.output).toContain(
 			"Scene 1 video v3: 30.0s, 90 words of dialogue (nar2) after it, longer than its 5.0s duration.",
@@ -424,7 +420,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 10,
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 					{
@@ -434,7 +429,6 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar2"],
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 				],
@@ -451,7 +445,7 @@ describe("executeToolCall", () => {
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain(
-			"1 image or untrimmed video left alone.",
+			"1 image or video without dialogue left alone.",
 		);
 	});
 
@@ -468,7 +462,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: [],
 						durationSec: 10,
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 					{
@@ -479,7 +472,6 @@ describe("executeToolCall", () => {
 						words: 180,
 						dialogueIds: ["nar2"],
 						durationSec: 15,
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 				],
@@ -505,7 +497,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 				],
@@ -531,7 +522,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 				],
@@ -555,7 +545,6 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
-						trimToDialogue: true,
 						decidedBy: "dialogue",
 					},
 				],
@@ -563,7 +552,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"No video elements trimmed to dialogue in scope.",
+			"No video elements with dialogue under them in scope.",
 		);
 	});
 

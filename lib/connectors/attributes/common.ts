@@ -1,4 +1,4 @@
-import { ArrowsStretch, Freeze, Repeat, Trim } from "@/components/ui/icon";
+import { Freeze, Repeat } from "@/components/ui/icon";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
@@ -13,6 +13,7 @@ import {
 	DEFAULT_MOTION,
 	MOTION_EFFECTS,
 } from "@/lib/render/motion-effect-names";
+import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import type { AttributeDef } from "./schema";
 
 /** Attribute leaves shared across multiple connector types. */
@@ -61,37 +62,28 @@ export const formatDef: AttributeDef = {
 	default: DEFAULT_IMAGE_FORMAT,
 };
 
+export const LOOP_FACES = {
+	off: { icon: Freeze, label: "Freeze on last frame" },
+	on: { icon: Repeat, label: "Loop" },
+} as const;
+
 export const loopDef: AttributeDef = {
 	key: "loop",
 	label: "Loop",
-	edit: {
-		kind: "toggle",
-		off: { icon: Freeze, label: "Freeze on last frame" },
-		on: { icon: Repeat, label: "Loop" },
-	},
+	edit: { kind: "toggle", ...LOOP_FACES },
 	default: TOGGLE_ON,
 };
 
-/**
- * Trimmed, a visual is on screen for the dialogue that follows it and no
- * longer. Untrimmed, it plays out in full and the dialogue can only extend it.
- */
-export const TRIM_TO_DIALOGUE_FACES = {
-	on: {
-		icon: Trim,
-		label: "Trim to dialogue",
-		hint: "Trimmed to the dialogue under it",
-	},
-	off: {
-		icon: ArrowsStretch,
-		label: "Play in full",
-		hint: "Plays its full length",
-	},
-} as const;
+export const trimStartDef: AttributeDef = {
+	key: "trimStart",
+	label: "Trim start",
+	unit: "s",
+	edit: { kind: "seconds", min: 0 },
+};
 
-export const trimToDialogueDef: AttributeDef = {
-	key: "trimToDialogue",
-	label: "Timing",
-	edit: { kind: "toggle", ...TRIM_TO_DIALOGUE_FACES },
-	default: TOGGLE_ON,
+export const timelineDurationDef: AttributeDef = {
+	key: "timelineDuration",
+	label: "Timeline duration",
+	unit: "s",
+	edit: { kind: "seconds", min: MIN_DURATION_SEC },
 };

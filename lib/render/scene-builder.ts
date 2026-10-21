@@ -18,14 +18,6 @@ export type BuildLayoutOptions = Pick<
 > &
 	Partial<Pick<VideoConfig, "fps">>;
 
-/**
- * Trimmed, a visual is on screen for the dialogue that follows it and no longer,
- * so a generated video's own length only decides what plays before it is cut.
- * Untrimmed, the video plays out in full and the dialogue can only extend it.
- */
-const visualDuration = (element: ResolvedElement): number =>
-	element.trimToDialogue ? 0 : element.durationSec;
-
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
 // Durations accumulated on the frame grid land a few ULPs above a whole frame.
@@ -102,7 +94,11 @@ export function buildRenderLayout(
 	let cursor = 0;
 
 	for (const raw of elements) {
-		const element = { ...raw, durationSec: onGrid(raw.durationSec) };
+		const element = {
+			...raw,
+			durationSec: onGrid(raw.durationSec),
+			mediaDurationSec: onGrid(raw.mediaDurationSec),
+		};
 		const stride = onGrid(loopStrideSec(element));
 		const current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);
@@ -125,7 +121,7 @@ export function buildRenderLayout(
 					// subsequent overlay/background/effect lands on the rendered timeline.
 					cursor -= transitionDurationSec;
 				}
-				series.push(createSequence(element, cursor, visualDuration(element)));
+				series.push(createSequence(element, cursor, element.durationSec));
 				break;
 			}
 			case "overlay": {

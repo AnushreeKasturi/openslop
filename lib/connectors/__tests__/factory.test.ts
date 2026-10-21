@@ -34,6 +34,8 @@ describe("resolveAttributeSchema", () => {
 			"emotion",
 			"speed",
 			"volume",
+			"trimStart",
+			"timelineDuration",
 		]);
 	});
 
@@ -50,10 +52,11 @@ describe("resolveAttributeSchema", () => {
 			"referenceImagesOverride",
 			"resolution",
 			"duration",
-			"trimToDialogue",
 			"loop",
 			"volume",
 			"motion",
+			"trimStart",
+			"timelineDuration",
 		]);
 	});
 
