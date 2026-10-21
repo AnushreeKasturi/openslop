@@ -14,7 +14,7 @@ import { transitionOverlapSec } from "./transitions";
 
 export type BuildLayoutOptions = Pick<
 	VideoSettings,
-	"transitionType" | "aspectRatio" | "captionStyle"
+	"transitionType" | "aspectRatio" | "captionStyle" | "filmGrain" | "rgbSplit"
 > &
 	Partial<Pick<VideoConfig, "fps">>;
 
@@ -86,6 +86,8 @@ export function buildRenderLayout(
 		transitionType,
 		aspectRatio,
 		captionStyle,
+		filmGrain,
+		rgbSplit,
 		fps = DEFAULT_CONFIG.fps,
 	}: BuildLayoutOptions,
 ): RenderLayout {
@@ -166,5 +168,7 @@ export function buildRenderLayout(
 		transitionType,
 		transitionDurationSec,
 		captionStyle,
+		filmGrain,
+		rgbSplit,
 	};
 }
