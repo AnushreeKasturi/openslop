@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/project/aspect-ratio";
+import type { MediaResolution } from "@/lib/project/aspect-ratio";
 import type { CharacterSchema } from "@/lib/api/request-schema-fields";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
@@ -49,9 +49,9 @@ export type ModelEntry = ModelMeta & {
 	id: string;
 };
 
-/** A video model also says which output resolutions the vendor renders it at, its default first. */
-export type VideoModelEntry = ModelEntry & {
-	resolutions: readonly [VideoResolution, ...VideoResolution[]];
+/** A visual model also says which resolutions the vendor renders it at, its default first. */
+export type VisualModelEntry = ModelEntry & {
+	resolutions: readonly [MediaResolution, ...MediaResolution[]];
 };
 
 /** What each connector type's catalog entries carry. */
@@ -59,8 +59,8 @@ export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	voice: ModelEntry;
-	image: ModelEntry;
-	video: VideoModelEntry;
+	image: VisualModelEntry;
+	video: VisualModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
 };
@@ -194,6 +194,7 @@ export type Character = z.infer<typeof CharacterSchema>;
 
 export type ImageGenerateParams = ConnectorGenerateParams & {
 	format?: ImageFormat;
+	resolution?: MediaResolution;
 	width?: number;
 	height?: number;
 	characterAssets?: Character[];
@@ -254,7 +255,7 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 	continuityFrames?: string[];
 	frameImage?: string;
 	duration?: number;
-	resolution?: VideoResolution;
+	resolution?: MediaResolution;
 	width?: number;
 	height?: number;
 };
