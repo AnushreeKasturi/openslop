@@ -34,6 +34,8 @@ function createSequence(
 
 type SequenceMap = RenderLayout["sequences"];
 
+type SceneSequence = Sequence & { overlaySec: number };
+
 /**
  * Lays down `element.loops` copies, each `stride` after the last. A stride
  * shorter than the copy overlaps them, which is how a looping effect crossfades
@@ -89,7 +91,7 @@ export function buildRenderLayout(
 	const onGrid = (sec: number) =>
 		toSeconds(toFrames(sec, config.fps), config.fps);
 	const transitionDurationSec = onGrid(transitionOverlapSec(transitionType));
-	const series: Sequence[] = [];
+	const series: SceneSequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;
 
@@ -121,19 +123,21 @@ export function buildRenderLayout(
 					// subsequent overlay/background/effect lands on the rendered timeline.
 					cursor -= transitionDurationSec;
 				}
-				series.push(createSequence(element, cursor, element.durationSec));
+				series.push({
+					...createSequence(element, cursor, element.durationSec),
+					overlaySec: 0,
+				});
 				break;
 			}
 			case "overlay": {
 				if (!current) {
-					series.push(
-						createSequence(blankScene(element), cursor, element.durationSec),
-					);
+					series.push({
+						...createSequence(blankScene(element), cursor, element.durationSec),
+						overlaySec: element.durationSec,
+					});
 				} else {
-					current.duration = Math.max(
-						current.duration,
-						cursor + element.durationSec - current.start,
-					);
+					current.overlaySec += element.durationSec;
+					current.duration = Math.max(current.duration, current.overlaySec);
 				}
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.durationSec;

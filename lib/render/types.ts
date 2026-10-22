@@ -30,6 +30,8 @@ export type Sequence = {
 	element: ResolvedElement;
 	start: number;
 	duration: number;
+	/** A scene says how long the overlays under it run; it holds at least that long. */
+	overlaySec?: number;
 };
 
 export type RenderLayout = {
