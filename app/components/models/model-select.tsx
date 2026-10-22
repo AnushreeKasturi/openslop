@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, Settings } from "@/components/ui/icon";
+import { InfoTip } from "@/components/ui/info-tip";
 import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
 import {
 	SimpleTooltip,
@@ -84,7 +85,8 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 	const keyFor = useProviderKeyLookup();
 	const settings = useSettings();
 
-	return listModels(type).map(({ provider, model, cost, speed }) => {
+	return listModels(type).map((entry) => {
+		const { provider, model, description } = entry;
 		const missing = keyFor(provider) === null;
 		return (
 			<SelectMenuItem
@@ -108,10 +110,11 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 				>
 					{model}
 				</span>
+				{description && <InfoTip label={description} />}
 				{missing ? (
 					<ConnectHint provider={provider} />
 				) : (
-					<ModelChips meta={{ cost, speed }} className="ml-auto" />
+					<ModelChips meta={entry} className="ml-auto" />
 				)}
 			</SelectMenuItem>
 		);

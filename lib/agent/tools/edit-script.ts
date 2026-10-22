@@ -105,6 +105,8 @@ export const editScript = defineTool({
 	  Attributes by type, all string values:
 	  ${attributesByType(ElementTypeSchema.options)}
 
+	  To change a model, set provider and model to a pair from list_models.
+
 	  ${CHARACTER_REFS_RULE}
 
 	  ${VIDEO_PROMPT_FORMAT}

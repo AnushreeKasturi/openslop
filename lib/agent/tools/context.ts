@@ -4,11 +4,13 @@ import type { ElementState } from "../element-state";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
+import type { Provider } from "@/lib/connectors/types";
 
 export const PROJECT_SETTERS = [
 	"setTitle",
 	"updateScriptSettings",
 	"updateVideoSettings",
+	"updateModels",
 ] as const;
 
 /** What a tool can do to the project, never the parts it is built from. */
@@ -33,4 +35,5 @@ export type AgentToolContext = Pick<
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
+	isConnected: (provider: Provider) => boolean;
 };

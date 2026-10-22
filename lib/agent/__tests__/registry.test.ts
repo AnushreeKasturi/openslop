@@ -58,6 +58,8 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	setTitle: () => {},
 	updateVideoSettings: () => {},
 	updateScriptSettings: () => {},
+	updateModels: () => {},
+	isConnected: () => true,
 	...over,
 });
 
@@ -674,6 +676,64 @@ describe("executeToolCall", () => {
 	});
 });
 
+describe("model tools", () => {
+	const run = (toolName: string, input: unknown, over = {}) =>
+		executeToolCall({ toolName, input }, context(over));
+
+	it("lists each type's connected models with what they do best", async () => {
+		const outcome = await run(
+			"list_models",
+			{},
+			{ isConnected: (provider: string) => provider === "openslop" },
+		);
+		const output = String(outcome.ok && outcome.output);
+
+		expect(output).toContain("Videos (type video)\n");
+		expect(output).toContain(
+			"- Slop Video v1 from openslop. Best for animation and anything that isn't live action.",
+		);
+		expect(output).not.toContain("from runware");
+	});
+
+	it("lists at most five models a type", async () => {
+		const outcome = await run("list_models", {});
+		const output = String(outcome.ok && outcome.output);
+
+		for (const section of output.split("\n\n"))
+			expect(section.split("\n- ").length - 1).toBeLessThanOrEqual(5);
+		expect(output).toMatch(/(\n- .*){5}/);
+	});
+
+	it("sets the default for every type the model's group covers, as the models panel does", async () => {
+		const updates: unknown[] = [];
+		const outcome = await run(
+			"set_default_model",
+			{ type: "voice", provider: "openslop", model: "Slop TTS v1" },
+			{ updateModels: (models: unknown) => void updates.push(models) },
+		);
+
+		expect(outcome.ok).toBe(true);
+		expect(updates).toEqual([
+			{
+				voice: { provider: "openslop", model: "Slop TTS v1" },
+				tts: { provider: "openslop", model: "Slop TTS v1" },
+			},
+		]);
+	});
+
+	it("refuses a default model the type does not have, writing nothing", async () => {
+		const writes: unknown[] = [];
+		const outcome = await run(
+			"set_default_model",
+			{ type: "video", provider: "openslop", model: "Slop Video v9" },
+			{ updateModels: (models: unknown) => void writes.push(models) },
+		);
+
+		expect(outcome.ok || outcome.errorText).toMatch(/Not a model of that type/);
+		expect(writes).toEqual([]);
+	});
+});
+
 describe("SLOPPY_TOOLS", () => {
 	it("offers the model exactly the tools the editor can run", () => {
 		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
@@ -690,6 +750,8 @@ describe("SLOPPY_TOOLS", () => {
 			"measure_element_lengths",
 			"fit_durations",
 			"set_title",
+			"list_models",
+			"set_default_model",
 		]);
 	});
 

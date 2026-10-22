@@ -18,8 +18,10 @@ import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { createConnector } from "@/lib/connectors/factory";
+import { findProviderKey } from "@/lib/connectors/provider-key";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
+import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
 import { streamScript } from "@/lib/script/stream-script";
 import { elementImage } from "../element-image";
@@ -30,6 +32,7 @@ import { executeToolCall } from "./registry";
 export function useAgentTools() {
 	const editor = useSlateStatic();
 	const store = useProjectStoreHandle();
+	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
 
@@ -79,10 +82,12 @@ export function useAgentTools() {
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
+				isConnected: (provider) =>
+					findProviderKey(account.getState().providerKeys, provider) !== null,
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, store, queue, buildContext],
+		[editor, store, account, queue, buildContext],
 	);
 }
